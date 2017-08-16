@@ -1,10 +1,9 @@
-apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 8
