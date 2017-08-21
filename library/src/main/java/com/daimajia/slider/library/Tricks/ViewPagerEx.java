@@ -559,6 +559,8 @@ public class ViewPagerEx extends ViewGroup{
             triggerOnPageChangeEvent(item);
             requestLayout();
         } else {
+            // TODO: 17-8-21  有时到这里getWindowToken为null，导致白屏，先处理一下
+            requestLayout();
             populate(item);
             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
         }
