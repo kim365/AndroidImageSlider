@@ -205,6 +205,7 @@ public class ViewPagerEx extends ViewGroup{
 
     private boolean mFirstLayout = true;
     private boolean mNeedCalculatePageOffsets = false;
+    private boolean needRetryPopulate = false;
     private boolean mCalledSuper;
     private int mDecorChildCount;
 
@@ -559,8 +560,6 @@ public class ViewPagerEx extends ViewGroup{
             triggerOnPageChangeEvent(item);
             requestLayout();
         } else {
-            // TODO: 17-8-21  有时到这里getWindowToken为null，导致白屏，先处理一下
-            requestLayout();
             populate(item);
             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
         }
@@ -933,6 +932,7 @@ public class ViewPagerEx extends ViewGroup{
     }
 
     void populate(int newCurrentItem) {
+        needRetryPopulate = true;
         ItemInfo oldCurInfo = null;
         int focusDirection = View.FOCUS_FORWARD;
         if (mCurItem != newCurrentItem) {
@@ -962,6 +962,8 @@ public class ViewPagerEx extends ViewGroup{
         if (getWindowToken() == null) {
             return;
         }
+
+        needRetryPopulate = false;
 
         mAdapter.startUpdate(this);
 
@@ -1376,6 +1378,10 @@ public class ViewPagerEx extends ViewGroup{
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mFirstLayout = true;
+        //如果上次populate没有成功执行完，再执行一次
+        if (needRetryPopulate) {
+            populate();
+        }
     }
 
     @Override
