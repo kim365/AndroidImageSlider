@@ -290,7 +290,7 @@ public class SliderLayout extends RelativeLayout{
     }
 
     /**
-     * set the duration between two slider changes. the duration value must >= 500
+     * set the duration between two slider changes. the duration value must greater than or equal to 500
      * @param duration
      */
     public void setDuration(long duration){

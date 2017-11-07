@@ -1,5 +1,20 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
+ext {
+    compileSdkVersion = 26
+    buildToolsVersion = "25.0.3"
+    minSdkVersion = 14
+    targetSdkVersion = 26
+    versionName = '1.1.6'
+    versionCode = 16
+    artifactId = 'fresco-image-slider'
+    userOrg = 'blue'
+    groupId = 'com.blue.slider'
+    uploadName = 'fresco-image-slider'
+    publishVersion = versionName
+    desc = 'This is an amazing image slider for the Android platform. I decided to open source this because there is really not an attractive, convenient slider widget in Android. '
+    website = 'https://github.com/kim365/AndroidImageSlider'
+    licences = ['Apache-2.0']
+}
 task wrapper(type: Wrapper) {
     gradleVersion = '2.2.1' 
 }
@@ -10,6 +25,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.novoda:bintray-release:0.5.0'
     }
 }
 

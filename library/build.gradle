@@ -1,14 +1,15 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '25.0.2'
+    compileSdkVersion project.compileSdkVersion
+    buildToolsVersion project.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 26
-        versionCode 16
-        versionName "1.1.6"
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode project.versionCode
+        versionName project.versionName
     }
     buildTypes {
         release {
@@ -28,4 +29,14 @@ dependencies {
 //    compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.facebook.fresco:fresco:1.5.0'
 }
-apply from: './gradle-mvn-push.gradle'
+
+publish {
+    artifactId = rootProject.artifactId
+    userOrg = rootProject.userOrg
+    groupId = rootProject.groupId
+    uploadName = rootProject.uploadName
+    publishVersion = rootProject.publishVersion
+    desc = rootProject.description
+    website = rootProject.website
+    licences = rootProject.licences
+}
