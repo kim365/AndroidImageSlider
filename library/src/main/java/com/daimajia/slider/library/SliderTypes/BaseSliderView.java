@@ -1,15 +1,27 @@
 package com.daimajia.slider.library.SliderTypes;
 
 import android.content.Context;
+import android.graphics.drawable.Animatable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.daimajia.slider.library.R;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
-import com.squareup.picasso.Transformation;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.drawable.ScalingUtils;
+import com.facebook.drawee.generic.GenericDraweeHierarchy;
+import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
+import com.facebook.drawee.generic.RoundingParams;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+
 
 import java.io.File;
 
@@ -47,10 +59,12 @@ public abstract class BaseSliderView {
     private ImageLoadListener mLoadListener;
 
     private String mDescription;
+    private String mSubTitle;
+    private Object mTag;
 
-    private Picasso mPicasso;
+    private RoundingParams roundingParams;
 
-    private Transformation mTransformation;
+    private ImagePipelineConfig mImagePipelineConfig;
 
     /**
      * Scale type of the image.
@@ -63,6 +77,14 @@ public abstract class BaseSliderView {
 
     protected BaseSliderView(Context context) {
         mContext = context;
+    }
+
+    public void setTag(Object tag) {
+        mTag = tag;
+    }
+
+    public Object getTag() {
+        return mTag;
     }
 
     /**
@@ -102,6 +124,16 @@ public abstract class BaseSliderView {
      */
     public BaseSliderView description(String description){
         mDescription = description;
+        return this;
+    }
+
+    /**
+     * the subtitle of a slider image.
+     * @param subTitle
+     * @return
+     */
+    public BaseSliderView subTitle(String subTitle){
+        mSubTitle = subTitle;
         return this;
     }
 
@@ -172,6 +204,10 @@ public abstract class BaseSliderView {
         return mDescription;
     }
 
+    public String getSubTitle() {
+        return mSubTitle;
+    }
+
     public Context getContext(){
         return mContext;
     }
@@ -186,13 +222,25 @@ public abstract class BaseSliderView {
         return this;
     }
 
+    public BaseSliderView imagePipelineConfig(ImagePipelineConfig imagePipelineConfig){
+        mImagePipelineConfig = imagePipelineConfig;
+        return this;
+    }
+
     /**
      * When you want to implement your own slider view, please call this method in the end in `getView()` method
      * @param v the whole view
      * @param targetImageView where to place image
      */
-    protected void bindEventAndShow(final View v, ImageView targetImageView){
+    protected void bindEventAndShow(final View v, SimpleDraweeView targetImageView){
         final BaseSliderView me = this;
+        if (!Fresco.hasBeenInitialized()) {
+            if(mImagePipelineConfig != null) {
+                Fresco.initialize(mContext, mImagePipelineConfig);
+            } else {
+                Fresco.initialize(mContext);
+            }
+        }
 
         v.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -210,64 +258,72 @@ public abstract class BaseSliderView {
             mLoadListener.onStart(me);
         }
 
-        Picasso p = (mPicasso != null) ? mPicasso : Picasso.with(mContext);
-        RequestCreator rq = null;
-        if(mUrl!=null){
-            rq = p.load(mUrl);
+        GenericDraweeHierarchy hierarchy = targetImageView.getHierarchy();
+        if (hierarchy == null) {
+            hierarchy = new GenericDraweeHierarchyBuilder(mContext.getResources()).build();
+        }
+        if(getEmpty() != 0){
+            hierarchy.setPlaceholderImage(getEmpty());
+        }
+        if(getError() != 0){
+            hierarchy.setFailureImage(getError());
+        }
+        switch (mScaleType){
+            case Fit:
+                hierarchy.setActualImageScaleType(ScalingUtils.ScaleType.FIT_XY);
+                break;
+            case CenterCrop:
+                hierarchy.setActualImageScaleType(ScalingUtils.ScaleType.CENTER_CROP);
+                break;
+            case CenterInside:
+                hierarchy.setActualImageScaleType(ScalingUtils.ScaleType.CENTER_INSIDE);
+                break;
+        }
+        if (roundingParams != null) {
+            hierarchy.setRoundingParams(roundingParams);
+        }
+        targetImageView.setHierarchy(hierarchy);
+        Uri uri;
+        if(mUrl != null){
+            if (TextUtils.isEmpty(mUrl)) {
+                mUrl = "http://";
+            }
+            uri = Uri.parse(mUrl);
         }else if(mFile != null){
-            rq = p.load(mFile);
+            uri = Uri.parse("file://" + mFile.getPath());
         }else if(mRes != 0){
-            rq = p.load(mRes);
+            uri = Uri.parse("res://tv.acfundanmaku.video/" + mRes);
         }else{
             return;
         }
+        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
+                .setProgressiveRenderingEnabled(true)
+                .build();
+        PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder();
+        builder.setImageRequest(request)
+                .setAutoPlayAnimations(true)
+                .setControllerListener(new BaseControllerListener<ImageInfo>(){
+                    @Override
+                    public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                        super.onFinalImageSet(id, imageInfo, animatable);
+                        if(v.findViewById(R.id.loading_bar) != null){
+                            v.findViewById(R.id.loading_bar).setVisibility(View.INVISIBLE);
+                        }
+                    }
 
-        if (mTransformation != null) {
-            rq.transform(mTransformation);
-        }
-
-        if(rq == null){
-            return;
-        }
-
-        if(getEmpty() != 0){
-            rq.placeholder(getEmpty());
-        }
-
-        if(getError() != 0){
-            rq.error(getError());
-        }
-
-        switch (mScaleType){
-            case Fit:
-                rq.fit();
-                break;
-            case CenterCrop:
-                rq.fit().centerCrop();
-                break;
-            case CenterInside:
-                rq.fit().centerInside();
-                break;
-        }
-
-        rq.into(targetImageView,new Callback() {
-            @Override
-            public void onSuccess() {
-                if(v.findViewById(R.id.loading_bar) != null){
-                    v.findViewById(R.id.loading_bar).setVisibility(View.INVISIBLE);
-                }
-            }
-
-            @Override
-            public void onError() {
-                if(mLoadListener != null){
-                    mLoadListener.onEnd(false,me);
-                }
-                if(v.findViewById(R.id.loading_bar) != null){
-                    v.findViewById(R.id.loading_bar).setVisibility(View.INVISIBLE);
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(String id, Throwable throwable) {
+                        super.onFailure(id, throwable);
+                        if(mLoadListener != null){
+                            mLoadListener.onEnd(false,me);
+                        }
+                        if(v.findViewById(R.id.loading_bar) != null){
+                            v.findViewById(R.id.loading_bar).setVisibility(View.INVISIBLE);
+                        }
+                    }
+                });
+        DraweeController controller = builder.build();
+        targetImageView.setController(controller);
    }
 
 
@@ -310,31 +366,25 @@ public abstract class BaseSliderView {
 
     public interface ImageLoadListener{
         public void onStart(BaseSliderView target);
-        public void onEnd(boolean result,BaseSliderView target);
+        public void onEnd(boolean result, BaseSliderView target);
     }
 
     /**
-     * Get the last instance set via setPicasso(), or null if no user provided instance was set
      *
-     * @return The current user-provided Picasso instance, or null if none
+     * @return
      */
-    public Picasso getPicasso() {
-        return mPicasso;
+    public RoundingParams getRoundingParams() {
+        return roundingParams;
     }
+
 
     /**
-     * Provide a Picasso instance to use when loading pictures, this is useful if you have a
-     * particular HTTP cache you would like to share.
-     *
-     * @param picasso The Picasso instance to use, may be null to let the system use the default
-     *                instance
+     * 圆角支持
+     * @param roundingParams
+     * @return
      */
-    public void setPicasso(Picasso picasso) {
-        mPicasso = picasso;
-    }
-
-    public BaseSliderView setTransformation(Transformation transformation) {
-        mTransformation = transformation;
+    public BaseSliderView setRoundingParams(RoundingParams roundingParams) {
+        this.roundingParams = roundingParams;
         return this;
     }
 }
