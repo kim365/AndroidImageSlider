@@ -6,7 +6,8 @@ android {
     buildToolsVersion '25.0.2'
 
     defaultConfig {
-        minSdkVersion 9
+        applicationId 'com.slider.demo'
+        minSdkVersion 14
         targetSdkVersion 26
         versionCode 2
         versionName "1.0.1"
@@ -22,6 +23,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':library')
     compile 'com.android.support:appcompat-v7:22.+'
-    compile 'com.nineoldandroids:library:2.4.0'
+//    compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.daimajia.androidanimations:library:1.0.3@aar'
 }
