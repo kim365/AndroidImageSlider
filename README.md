@@ -20,10 +20,7 @@ You can easily load images from an internet URL, drawable, or file. And there ar
 
 ```groovy
 dependencies {
-    	compile "com.android.support:support-v4:+"
-    	compile 'com.squareup.picasso:picasso:2.3.2'
-    	compile 'com.nineoldandroids:library:2.4.0'
-    	compile 'com.daimajia.slider:library:1.1.5@aar'
+    	compile 'com.blue.slider:fresco-image-slider:1.1.6'
 }
 ```
 
@@ -32,20 +29,10 @@ dependencies {
 
 ```xml
 <dependency>
-    <groupId>com.squareup.picasso</groupId>
-    <artifactId>picasso</artifactId>
-    <version>2.3.2</version>
-</dependency>
-<dependency>
-    <groupId>com.nineoldandroids</groupId>
-    <artifactId>library</artifactId>
-    <version>2.4.0</version>
-</dependency>
-<dependency>
-    <groupId>com.daimajia.slider</groupId>
-    <artifactId>library</artifactId>
-    <version>1.1.2</version>
-    <type>apklib</type>
+  <groupId>com.blue.slider</groupId>
+  <artifactId>fresco-image-slider</artifactId>
+  <version>1.1.6</version>
+  <type>pom</type>
 </dependency>
 ```
 
