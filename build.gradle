@@ -4,8 +4,8 @@ ext {
     buildToolsVersion = "25.0.3"
     minSdkVersion = 14
     targetSdkVersion = 26
-    versionName = '1.1.6'
-    versionCode = 16
+    versionName = '1.1.7'
+    versionCode = 17
     artifactId = 'fresco-image-slider'
     userOrg = 'blue'
     groupId = 'com.blue.slider'

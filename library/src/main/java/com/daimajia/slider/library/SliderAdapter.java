@@ -28,6 +28,23 @@ public class SliderAdapter extends PagerAdapter implements BaseSliderView.ImageL
         notifyDataSetChanged();
     }
 
+    public <T extends BaseSliderView> void insertSlider(T slider, int position){
+        if (position > 0 && mImageContents.size() > position) {
+            slider.setOnImageLoadListener(this);
+            mImageContents.add(position, slider);
+            notifyDataSetChanged();
+        }
+    }
+
+    public <T extends BaseSliderView> void insertSliderAndRemoveEnd(T slider, int position){
+        if (position > 0 && mImageContents.size() > position) {
+            slider.setOnImageLoadListener(this);
+            mImageContents.add(position, slider);
+            mImageContents.remove(mImageContents.size() - 1);
+            notifyDataSetChanged();
+        }
+    }
+
     public BaseSliderView getSliderView(int position){
         if(position < 0 || position >= mImageContents.size()){
             return null;
@@ -51,6 +68,13 @@ public class SliderAdapter extends PagerAdapter implements BaseSliderView.ImageL
     public void removeSliderAt(int position){
         if(mImageContents.size() > position){
             mImageContents.remove(position);
+            notifyDataSetChanged();
+        }
+    }
+
+    public void removeSliderEnd() {
+        if (mImageContents.size() > 0) {
+            mImageContents.remove(mImageContents.size() - 1);
             notifyDataSetChanged();
         }
     }
